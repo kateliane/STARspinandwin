@@ -1,572 +1,112 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spin2Win</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat;
-        }
+import { useState } from "react";
+import { SpinWheel, WheelSlice } from "@/components/SpinWheel";
+import { ResultModal } from "@/components/ResultModal";
+
+const Index = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [winningPrize, setWinningPrize] = useState("");
+
+  // Configure wheel slices with probability weights
+  // Higher probability = more likely to win
+  const wheelSlices: WheelSlice[] = [
+    { 
+      name: "Supreme Cream", 
+      color: "--wheel-pink",
+      probability: 10 // 10% chance
+    },
+    { 
+      name: "Foundation", 
+      color: "--wheel-purple",
+      probability: 20 // 20% chance
+    },
+    { 
+      name: "Night Serum", 
+      color: "--wheel-blue",
+      probability: 25 // 25% chance
+    },
+    { 
+      name: "Lipstick Set", 
+      color: "--wheel-cyan",
+      probability: 15 // 15% chance
+    },
+    { 
+      name: "Holiday Glow", 
+      color: "--wheel-green",
+      probability: 20 // 20% chance
+    },
+    { 
+      name: "Futurist Moisturizer", 
+      color: "--wheel-yellow",
+      probability: 10 // 10% chance
+    },
+  ];
+
+  const handleWin = (prize: string) => {
+    setWinningPrize(prize);
+    setIsModalOpen(true);
+  };
+
+  return (
+    <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden">
+      {/* Decorative Elements */}
+      <div className="absolute inset-0 pointer-events-none opacity-10">
+        <div className="absolute top-[10%] left-[10%] text-[150px] md:text-[150px] text-primary transform rotate-[15deg]">
+          ✿
+        </div>
+        <div className="absolute bottom-[10%] right-[10%] text-[150px] md:text-[150px] text-primary transform -rotate-[15deg]">
+          ✿
+        </div>
+      </div>
+
+      {/* Header */}
+      <header className="text-center mb-8 md:mb-12 px-4 absolute top-8 md:top-12 left-0 right-0 z-10">
+        <h1 className="text-4xl md:text-6xl font-normal text-primary mb-4 tracking-[3px]">
+          Spin2Win
+        </h1>
+        <p className="text-lg md:text-xl text-muted-foreground max-w-lg mx-auto font-light tracking-wide">
+          Try your luck and win exclusive beauty products
+        </p>
+      </header>
+
+      {/* Wheel Container */}
+      <div className="flex-1 flex flex-col items-center justify-center w-full px-4 pt-32 md:pt-0">
+        <SpinWheel slices={wheelSlices} onWin={handleWin} />
         
-        body {
-            background: linear-gradient(135deg, #fdfcfb 0%, #0e1236 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #5d4037;
-            overflow: hidden;
-        }
+        {/* Desktop Instructions */}
+        <p className="hidden md:block text-center mt-8 text-primary text-lg font-light tracking-wide">
+          Gently drag the wheel to reveal your prize
+        </p>
         
-        .container {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-            width: 100%;
-            position: absolute;
-            top: 30px;
-            z-index: 10;
-        }
-        
-        h1 {
-            color: #8d6e63;
-            font-size: 3rem;
-            margin-bottom: 10px;
-            font-weight: 400;
-            letter-spacing: 3px;
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            color: #a1887f;
-            max-width: 500px;
-            margin: 0 auto;
-            font-weight: 300;
-            letter-spacing: 1px;
-        }
-        
-        .wheel-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .wheel {
-            width: 120vmin;
-            height: 120vmin;
-            max-width: 800px;
-            max-height: 800px;
-            position: relative;
-            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.1));
-        }
-        
-        .wheel-circle {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: conic-gradient(
-                #f8bbd0 0% 16.66%,
-                #e1bee7 16.66% 33.33%,
-                #c5cae9 33.33% 50%,
-                #b2ebf2 50% 66.66%,
-                #c8e6c9 66.66% 83.33%,
-                #fff9c4 83.33% 100%
+        {/* Mobile Instructions */}
+        <p className="md:hidden text-center mt-8 text-primary text-xl font-normal animate-pulse-elegant tracking-wide">
+          Drag to spin
+        </p>
+      </div>
+
+      {/* Result Modal */}
+      <ResultModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        prize={winningPrize}
+      />
+
+      {/* Probability Info (Hidden - for developer reference) */}
+      <div className="hidden">
+        <h3>Wheel Probability Configuration:</h3>
+        <ul>
+          {wheelSlices.map((slice, index) => {
+            const totalWeight = wheelSlices.reduce((sum, s) => sum + s.probability, 0);
+            const percentage = ((slice.probability / totalWeight) * 100).toFixed(1);
+            return (
+              <li key={index}>
+                {slice.name}: {slice.probability} weight ({percentage}% chance)
+              </li>
             );
-            position: relative;
-            transition: transform 4s cubic-bezier(0.17, 0.67, 0.18, 0.99);
-            box-shadow: 
-                inset 0 0 50px rgba(255,255,255,0.8),
-                0 10px 30px rgba(0,0,0,0.15);
-            overflow: hidden;
-            cursor: grab;
-            touch-action: none;
-            border: 8px solid white;
-        }
-        
-        .wheel-circle:active {
-            cursor: grabbing;
-        }
-        
-        .wheel-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 15%;
-            height: 15%;
-            min-width: 80px;
-            min-height: 80px;
-            background: white;
-            border-radius: 50%;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 
-                0 0 20px rgba(0,0,0,0.15),
-                inset 0 0 10px rgba(0,0,0,0.05);
-            border: 3px solid #8d6e63;
-            font-weight: 500;
-            color: #8d6e63;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
-        }
-        
-        .wheel-pointer {
-            position: absolute;
-            top: 50%;
-            right: -3%;
-            transform: translateY(-50%);
-            width: 5%;
-            height: 8%;
-            min-width: 25px;
-            min-height: 40px;
-            background: #8d6e63;
-            clip-path: polygon(0 50%, 100% 0, 100% 100%);
-            z-index: 20;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
-        }
-        
-        .wheel-section {
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            transform-origin: bottom right;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-weight: 500;
-            color: #5d4037;
-        }
-        
-        .section-text {
-            transform: rotate(225deg);
-            font-size: 1.3rem;
-            width: 100px;
-            line-height: 1.4;
-            padding: 8px;
-            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
-            letter-spacing: 0.5px;
-        }
-        
-        .section-divider {
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
-            top: 50%;
-            left: 0;
-            transform: translateY(-50%);
-            z-index: 5;
-        }
-        
-        .instructions {
-            text-align: center;
-            margin-top: 30px;
-            color: #8d6e63;
-            font-size: 1.1rem;
-            position: absolute;
-            bottom: 40px;
-            width: 100%;
-            font-weight: 300;
-            letter-spacing: 1px;
-        }
-        
-        .swipe-instruction {
-            display: none;
-            text-align: center;
-            margin-top: 30px;
-            color: #8d6e63;
-            font-weight: 400;
-            font-size: 1.3rem;
-            animation: pulse 2s infinite;
-            letter-spacing: 1px;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
-        }
-        
-        /* Elegant Popup Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(141, 110, 99, 0.9);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 90%;
-            width: 450px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-            animation: elegantPopIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid #f5f5f5;
-        }
-        
-        @keyframes elegantPopIn {
-            0% { transform: scale(0.8) translateY(20px); opacity: 0; }
-            100% { transform: scale(1) translateY(0); opacity: 1; }
-        }
-        
-        .modal h2 {
-            color: #8d6e63;
-            margin-bottom: 20px;
-            font-size: 2rem;
-            font-weight: 400;
-            letter-spacing: 2px;
-        }
-        
-        .modal p {
-            margin-bottom: 30px;
-            font-size: 1.3rem;
-            color: #5d4037;
-            line-height: 1.6;
-        }
-        
-        .modal-button {
-            background: #8d6e63;
-            color: white;
-            border: none;
-            padding: 12px 35px;
-            font-size: 1.1rem;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(141, 110, 99, 0.3);
-            letter-spacing: 1px;
-            font-weight: 400;
-        }
-        
-        .modal-button:hover {
-            background: #6d4c41;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(141, 110, 99, 0.4);
-        }
-        
-        /* Decorative elements */
-        .decoration {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-        
-        .floral {
-            position: absolute;
-            opacity: 0.1;
-            font-size: 150px;
-            color: #8d6e63;
-        }
-        
-        .floral-1 { top: 10%; left: 10%; transform: rotate(15deg); }
-        .floral-2 { bottom: 10%; right: 10%; transform: rotate(-15deg); }
-        
-        /* Mobile styles */
-        @media (max-width: 768px) {
-            .wheel {
-                width: 140vmin;
-                height: 140vmin;
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-            }
-            
-            .wheel-container {
-                justify-content: flex-start;
-                overflow: visible;
-            }
-            
-            .instructions {
-                display: none;
-            }
-            
-            .swipe-instruction {
-                display: block;
-                position: absolute;
-                bottom: 50px;
-                width: 100%;
-            }
-            
-            .section-text {
-                font-size: 1.1rem;
-                width: 90px;
-            }
-            
-            h1 {
-                font-size: 2.2rem;
-            }
-            
-            .subtitle {
-                font-size: 1rem;
-                padding: 0 20px;
-            }
-            
-            /* Hide left side of wheel on mobile */
-            .wheel::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 50%;
-                height: 100%;
-                background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
-                z-index: 5;
-            }
-            
-            /* Ensure pointer is fully visible */
-            .wheel-pointer {
-                right: -2%;
-                z-index: 25;
-            }
-            
-            .floral {
-                font-size: 100px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .section-text {
-                font-size: 0.95rem;
-                width: 80px;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            .wheel {
-                width: 150vmin;
-                height: 150vmin;
-		left: -5%;
-            }
-            
-            .wheel-pointer {
-                right: -1.5%;
-            }
-            
-            .floral {
-                font-size: 80px;
-            }
-        }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <div class="container">        
-        <div class="decoration">
-            <div class="floral floral-1">✿</div>
-            <div class="floral floral-2">✿</div>
-        </div>
-        
-        <div class="wheel-container">
-            <div class="wheel">
-                <div class="wheel-pointer"></div>
-                <div class="wheel-circle" id="wheelCircle">
-                    <div class="section-divider"></div>
-                    <div class="wheel-section" style="transform: rotate(0deg);">
-                        <div class="section-text">Supreme Cream</div>
-                    </div>
-                    <div class="wheel-section" style="transform: rotate(60deg);">
-                        <div class="section-text">Foundation</div>
-                    </div>
-                    <div class="wheel-section" style="transform: rotate(120deg);">
-                        <div class="section-text">Night Serum</div>
-                    </div>
-                    <div class="wheel-section" style="transform: rotate(180deg);">
-                        <div class="section-text">Lipstick Set</div>
-                    </div>
-                    <div class="wheel-section" style="transform: rotate(240deg);">
-                        <div class="section-text">Holiday Glow</div>
-                    </div>
-                    <div class="wheel-section" style="transform: rotate(300deg);">
-                        <div class="section-text">Futurist Moisturizer</div>
-                    </div>
-                </div>
-                <div class="wheel-center">SPIN</div>
-            </div>
-            
-            <p class="instructions">Gently drag the wheel to reveal your prize</p>
-            <p class="swipe-instruction">Drag to spin</p>
-        </div>
+          })}
+        </ul>
+      </div>
     </div>
-    
-    <!-- Elegant Popup Modal -->
-    <div class="modal" id="resultModal">
-        <div class="modal-content">
-            <h2>Congratulations!</h2>
-            <p>You've won:<br><span id="resultProduct"></span></p>
-            <button class="modal-button" id="closeModal">Claim Your Prize</button>
-        </div>
-    </div>
+  );
+};
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const wheel = document.getElementById('wheelCircle');
-        const resultModal = document.getElementById('resultModal');
-        const resultProduct = document.getElementById('resultProduct');
-        const closeModal = document.getElementById('closeModal');
-        
-        let isSpinning = false;
-        let rotation = 0;
-        let startX = 0;
-        let startY = 0;
-        let currentX = 0;
-        let currentY = 0;
-        let isDragging = false;
-        let currentRotation = 0;
-
-        const slices = [
-            { name: "Supreme Cream", products: ["Supreme Cream"] },
-            { name: "Foundation", products: ["Foundation"] },
-            { name: "Night Serum", products: ["Night Serum"] },
-            { name: "Lipstick Set", products: ["Lipstick Set"] },
-            { name: "Holiday Glow", products: ["Holiday Glow"] },
-            { name: "Futurist Moisturizer", products: ["Futurist Moisturizer"] }
-        ];
-
-        // Touch/Mouse events for spinning
-        wheel.addEventListener('mousedown', startDrag);
-        wheel.addEventListener('touchstart', startDrag, { passive: false });
-        
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('touchmove', drag, { passive: false });
-        
-        document.addEventListener('mouseup', endDrag);
-        document.addEventListener('touchend', endDrag);
-
-        function startDrag(e) {
-            if (isSpinning) return;
-            isDragging = true;
-            startX = e.clientX || e.touches[0].clientX;
-            startY = e.clientY || e.touches[0].clientY;
-            currentX = startX;
-            currentY = startY;
-
-            wheel.style.boxShadow = "inset 0 0 50px rgba(255,255,255,0.9), 0 15px 40px rgba(0,0,0,0.2)";
-            e.preventDefault();
-        }
-
-        function drag(e) {
-            if (!isDragging || isSpinning) return;
-
-            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-            if (!clientX || !clientY) return;
-
-            currentX = clientX;
-            currentY = clientY;
-
-            const deltaX = currentX - startX;
-            const deltaY = currentY - startY;
-            const rotationPower = Math.sqrt(deltaX * deltaX + deltaY * deltaY) * 0.4;
-            const rotationDirection = deltaX > 0 ? 1 : -1;
-
-            currentRotation = rotationDirection * rotationPower;
-            wheel.style.transform = `rotate(${currentRotation}deg)`;
-
-            e.preventDefault();
-        }
-
-        function endDrag() {
-            if (!isDragging || isSpinning) return;
-            isDragging = false;
-
-            wheel.style.boxShadow = "inset 0 0 50px rgba(255,255,255,0.8), 0 10px 30px rgba(0,0,0,0.15)";
-
-            const deltaX = currentX - startX;
-            const deltaY = currentY - startY;
-            const dragDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-            if (dragDistance > 25) {
-                const rotationDirection = deltaX > 0 ? 1 : -1;
-                spinWheel(dragDistance, rotationDirection);
-            } else {
-                wheel.style.transform = `rotate(0deg)`;
-                currentRotation = 0;
-            }
-        }
-
-        function spinWheel(dragDistance, direction) {
-            if (isSpinning) return;
-            isSpinning = true;
-
-            const segments = 6;
-            const extraRotation = Math.floor(Math.random() * segments);
-            const baseRotation = Math.min(dragDistance * 2.2, 2800);
-
-            rotation = baseRotation + (extraRotation * 60);
-            wheel.style.transform = `rotate(${currentRotation + (direction * rotation)}deg)`;
-
-            setTimeout(() => {
-                const segmentAngle = 360 / segments;
-                const finalRotation = currentRotation + (direction * rotation);
-
-                // Normalize to 0–360 range
-                let normalized = ((finalRotation % 360) + 360) % 360;
-
-                // Invert rotation because wheel rotates opposite to pointer
-                let pointerAngle = (360 - normalized) % 360;
-
-                // Optional: center the pointer on the middle of a slice
-                pointerAngle = (pointerAngle - 210 + 360) % 360;
-
-                const segmentIndex = Math.floor(pointerAngle / segmentAngle);
-                const slice = slices[segmentIndex];
-                const randomProduct = slice.products[Math.floor(Math.random() * slice.products.length)];
-
-                resultProduct.textContent = randomProduct;
-                resultModal.style.display = 'flex';
-
-                isSpinning = false;
-                currentRotation = 0;
-            }, 4000);
-        }
-
-        closeModal.addEventListener('click', function() {
-            resultModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', function(e) {
-            if (e.target === resultModal) {
-                resultModal.style.display = 'none';
-            }
-        });
-    });
-</script>
-
-</body>
-</html>
+export default Index;
